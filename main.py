@@ -1,7 +1,7 @@
 import cv2
 import os
 
-cap=cv2.VideoCapture(0) #0 for default camera 1 for external camera
+cap=cv2.VideoCapture(1) #0 for default camera 1 for external camera
 cap.set(3,640)
 cap.set(4,480)
 
