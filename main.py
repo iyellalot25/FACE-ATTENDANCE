@@ -1,6 +1,6 @@
 import cv2
 import os
-
+import pickle
 cap=cv2.VideoCapture(1) #0 for default camera 1 for external camera
 cap.set(3,640)
 cap.set(4,480)
@@ -12,6 +12,13 @@ folderModePath="resources/modes"
 imgModeList=[]
 for path in os.listdir(folderModePath):
     imgModeList.append(cv2.imread(os.path.join(folderModePath,path)))
+
+#Loading the encoding file
+print("Loading Encode File...")
+with open('EncodeFile.p','rb') as file:
+    encodeListKnownWithIds= pickle.load(file)
+    encodeListKnown,studentids=encodeListKnownWithIds
+print("Encode file loaded...")
 
 while True:
     success, img= cap.read()
