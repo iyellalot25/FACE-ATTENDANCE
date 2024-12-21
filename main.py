@@ -1,7 +1,10 @@
 import cv2
 import os
 import pickle
-cap=cv2.VideoCapture(1) #0 for default camera 1 for external camera
+import face_recognition
+import numpy as np
+
+cap=cv2.VideoCapture(0) #0 for default camera 1 for external camera
 cap.set(3,640)
 cap.set(4,480)
 
@@ -23,8 +26,22 @@ print("Encode file loaded...")
 while True:
     success, img= cap.read()
 
+    imgS=cv2.resize(img,(0,0),None,0.25,0.25)
+    imgS = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+    faceCurFrame=face_recognition.face_locations(imgS)
+    encodeCurFrame=face_recognition.face_encodings(imgS,faceCurFrame)
+
     imgBackground[162:162+480,55:55+640]= img #for overlay
     imgBackground[44:44+633,808:808+414]= imgModeList[0] #for mode selection
+
+    for encoFace, faceLoc in zip(encodeCurFrame, faceCurFrame):
+        matches = face_recognition.compare_faces(encodeListKnown, encoFace)
+        faceDis = face_recognition.face_distance(encodeListKnown, encoFace)
+        matchIndex = np.argmin(faceDis)
+        if matches[matchIndex]:
+            name = studentids[matchIndex].upper()
+            print(name)
 
     #cv2.imshow("Webcam",img) #for display webcam feed seperately
     cv2.imshow("Face Attendance", imgBackground)
