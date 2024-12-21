@@ -6,6 +6,7 @@ import face_recognition
 import numpy as np
 import cvzone
 from datetime import datetime
+import time
 
 # Connect to SQLite database
 conn = sqlite3.connect('database/students.db')
@@ -38,7 +39,7 @@ def mark_attendance(student_id):
         total_attendance, last_attendance_time_str = student
         last_attendance_time = datetime.strptime(last_attendance_time_str, '%Y-%m-%d %H:%M:%S')
         
-        if (current_time - last_attendance_time).total_seconds() >= 30:
+        if (current_time - last_attendance_time).total_seconds() >= 3:
             total_attendance += 1
             cursor.execute("UPDATE students SET total_attendance = ?, last_attendance_time = ? WHERE id = ?",
                         (total_attendance, current_time.strftime('%Y-%m-%d %H:%M:%S'), student_id))
@@ -51,6 +52,8 @@ def mark_attendance(student_id):
     else:
         print("Student not found.")
         return False
+
+current_mode = 0  # 0: Default, 1: Attendance Marked, 2: Attendance Prevented
 
 while True:
     success, img= cap.read()
@@ -75,7 +78,10 @@ while True:
             bbox = 55 + x1, 162 + y1, x2 - x1, y2 - y1
             imgBackground = cvzone.cornerRect(imgBackground, bbox, rt=0)
             result = mark_attendance(id)
-
+            if result:
+                imgBackground[44:44 + 633, 808:808 + 414] = imgModeList[2]  # for mode selection
+            else:
+                imgBackground[44:44 + 633, 808:808 + 414] = imgModeList[3]  # for mode selection
 
     #cv2.imshow("Webcam",img) #for display webcam feed seperately
     cv2.imshow("Face Attendance", imgBackground)
