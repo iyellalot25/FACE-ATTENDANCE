@@ -1,9 +1,15 @@
 import cv2
+import sqlite3
 import os
 import pickle
 import face_recognition
 import numpy as np
 import cvzone
+from datetime import datetime
+
+# Connect to SQLite database
+conn = sqlite3.connect('database/students.db')
+cursor = conn.cursor()
 
 cap=cv2.VideoCapture(0) #0 for default camera 1 for external camera
 cap.set(3,640)
@@ -24,6 +30,28 @@ with open('EncodeFile.p','rb') as file:
     encodeListKnown,studentids=encodeListKnownWithIds
 print("Encode file loaded...")
 
+def mark_attendance(student_id):
+    current_time = datetime.now()
+    cursor.execute("SELECT total_attendance, last_attendance_time FROM students WHERE id = ?", (student_id,))
+    student = cursor.fetchone()
+    if student:
+        total_attendance, last_attendance_time_str = student
+        last_attendance_time = datetime.strptime(last_attendance_time_str, '%Y-%m-%d %H:%M:%S')
+        
+        if (current_time - last_attendance_time).total_seconds() >= 30:
+            total_attendance += 1
+            cursor.execute("UPDATE students SET total_attendance = ?, last_attendance_time = ? WHERE id = ?",
+                        (total_attendance, current_time.strftime('%Y-%m-%d %H:%M:%S'), student_id))
+            conn.commit()
+            print(f"Attendance marked for student ID {student_id}. Total attendance: {total_attendance}")
+            return True
+        else:
+            print("Attendance prevented: Last attendance was less than 30 seconds ago.")
+            return False
+    else:
+        print("Student not found.")
+        return False
+
 while True:
     success, img= cap.read()
 
@@ -41,12 +69,13 @@ while True:
         faceDis = face_recognition.face_distance(encodeListKnown, encoFace)
         matchIndex = np.argmin(faceDis)
         if matches[matchIndex]:
-            name = studentids[matchIndex].upper()
-            print(name)
+            id = studentids[matchIndex].upper()
             y1, x2, y2, x1 = faceLoc
             y1, x2, y2, x1 = y1 * 4, x2 * 4, y2 * 4, x1 * 4 #to get back og size as we reduced it by 1/4th
             bbox = 55 + x1, 162 + y1, x2 - x1, y2 - y1
             imgBackground = cvzone.cornerRect(imgBackground, bbox, rt=0)
+            result = mark_attendance(id)
+
 
     #cv2.imshow("Webcam",img) #for display webcam feed seperately
     cv2.imshow("Face Attendance", imgBackground)
