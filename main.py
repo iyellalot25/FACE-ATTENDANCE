@@ -3,6 +3,7 @@ import os
 import pickle
 import face_recognition
 import numpy as np
+import cvzone
 
 cap=cv2.VideoCapture(0) #0 for default camera 1 for external camera
 cap.set(3,640)
@@ -42,6 +43,10 @@ while True:
         if matches[matchIndex]:
             name = studentids[matchIndex].upper()
             print(name)
+            y1, x2, y2, x1 = faceLoc
+            y1, x2, y2, x1 = y1 * 4, x2 * 4, y2 * 4, x1 * 4 #to get back og size as we reduced it by 1/4th
+            bbox = 55 + x1, 162 + y1, x2 - x1, y2 - y1
+            imgBackground = cvzone.cornerRect(imgBackground, bbox, rt=0)
 
     #cv2.imshow("Webcam",img) #for display webcam feed seperately
     cv2.imshow("Face Attendance", imgBackground)
