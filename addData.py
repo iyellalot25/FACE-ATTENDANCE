@@ -59,9 +59,9 @@ def process_images_in_directory(directory):
             student_id_str = extract_numbers(filename)  # Extract numbers from filename
             if student_id_str:  # Check if any numbers were found
                 student_id = int(student_id_str)  # Convert to integer
-                student_name = filename.split('.')[0]  # Use filename (without extension) as name
                 
                 # Prompt for additional student details
+                student_name = input(f"Enter name for {student_id_str}: ")
                 major = input(f"Enter major for {student_name}: ")
                 starting_year = int(input(f"Enter starting year for {student_name}: "))
                 total_attendance = int(input(f"Enter total attendance for {student_name}: "))

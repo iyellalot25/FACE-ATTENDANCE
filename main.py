@@ -53,7 +53,33 @@ def mark_attendance(student_id):
         print("Student not found.")
         return False
 
-current_mode = 0  # 0: Default, 1: Attendance Marked, 2: Attendance Prevented
+import sqlite3
+
+def fetch_student_data(student_id):
+    conn = sqlite3.connect('database/students.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM students WHERE id = ?", (student_id,))
+    student_data = cursor.fetchone()
+    conn.close()
+    
+    if student_data:
+        human_readable_data = []
+        for item in student_data:
+            if isinstance(item, bytes):
+                try:
+                    # Attempt to decode as UTF-8
+                    human_readable_data.append(item.decode('utf-8'))
+                except UnicodeDecodeError:
+                    # If decoding fails, handle it as binary or skip
+                    human_readable_data.append(f"Binary data (length: {len(item)})")
+            else:
+                human_readable_data.append(item)
+        return human_readable_data
+    else:
+        return None
+
+counter=0
+id=-1
 
 while True:
     success, img= cap.read()
@@ -66,22 +92,27 @@ while True:
 
     imgBackground[162:162+480,55:55+640]= img #for overlay
     imgBackground[44:44+633,808:808+414]= imgModeList[0] #for mode selection
+    
+    if faceCurFrame:
+        for encoFace, faceLoc in zip(encodeCurFrame, faceCurFrame):
+            matches = face_recognition.compare_faces(encodeListKnown, encoFace)
+            faceDis = face_recognition.face_distance(encodeListKnown, encoFace)
+            matchIndex = np.argmin(faceDis)
 
-    for encoFace, faceLoc in zip(encodeCurFrame, faceCurFrame):
-        matches = face_recognition.compare_faces(encodeListKnown, encoFace)
-        faceDis = face_recognition.face_distance(encodeListKnown, encoFace)
-        matchIndex = np.argmin(faceDis)
-        if matches[matchIndex]:
-            id = studentids[matchIndex].upper()
-            y1, x2, y2, x1 = faceLoc
-            y1, x2, y2, x1 = y1 * 4, x2 * 4, y2 * 4, x1 * 4 #to get back og size as we reduced it by 1/4th
-            bbox = 55 + x1, 162 + y1, x2 - x1, y2 - y1
-            imgBackground = cvzone.cornerRect(imgBackground, bbox, rt=0)
-            result = mark_attendance(id)
-            if result:
-                imgBackground[44:44 + 633, 808:808 + 414] = imgModeList[2]  # for mode selection
-            else:
-                imgBackground[44:44 + 633, 808:808 + 414] = imgModeList[3]  # for mode selection
+            if matches[matchIndex]:
+                id = studentids[matchIndex].upper()
+                y1, x2, y2, x1 = faceLoc
+                y1, x2, y2, x1 = y1 * 4, x2 * 4, y2 * 4, x1 * 4
+                bbox = 55 + x1, 162 + y1, x2 - x1, y2 - y1
+                imgBackground = cvzone.cornerRect(imgBackground, bbox, rt=0)
+                #result = mark_attendance(id)
+                if counter==0:
+                    counter=1
+        if counter!=0:
+            if counter==1:
+                studentInfo=fetch_student_data(id)
+                print(studentInfo)
+
 
     #cv2.imshow("Webcam",img) #for display webcam feed seperately
     cv2.imshow("Face Attendance", imgBackground)
