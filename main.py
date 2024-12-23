@@ -8,6 +8,7 @@ import cvzone
 from datetime import datetime
 import time
 
+
 # Connect to SQLite database
 conn = sqlite3.connect('database/students.db')
 cursor = conn.cursor()
@@ -53,8 +54,6 @@ def mark_attendance(student_id):
         print("Student not found.")
         return False
 
-import sqlite3
-
 def fetch_student_data(student_id):
     conn = sqlite3.connect('database/students.db')
     cursor = conn.cursor()
@@ -79,6 +78,7 @@ def fetch_student_data(student_id):
         return None
 
 counter=0
+modeType=0
 id=-1
 
 while True:
@@ -91,7 +91,7 @@ while True:
     encodeCurFrame=face_recognition.face_encodings(imgS,faceCurFrame)
 
     imgBackground[162:162+480,55:55+640]= img #for overlay
-    imgBackground[44:44+633,808:808+414]= imgModeList[0] #for mode selection
+    imgBackground[44:44+633,808:808+414]= imgModeList[modeType] #for mode selection
     
     if faceCurFrame:
         for encoFace, faceLoc in zip(encodeCurFrame, faceCurFrame):
@@ -108,10 +108,13 @@ while True:
                 #result = mark_attendance(id)
                 if counter==0:
                     counter=1
+                    modeType=1
         if counter!=0:
             if counter==1:
                 studentInfo=fetch_student_data(id)
                 print(studentInfo)
+                counter+=1
+        cv2.putText(imgBackground,str(studentInfo[4]),(861,125),cv2.FONT_HERSHEY_COMPLEX,1,(255,255,255),1)
 
 
     #cv2.imshow("Webcam",img) #for display webcam feed seperately
