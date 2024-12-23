@@ -115,6 +115,14 @@ while True:
                 print(studentInfo)
                 counter+=1
         cv2.putText(imgBackground,str(studentInfo[4]),(861,125),cv2.FONT_HERSHEY_COMPLEX,1,(255,255,255),1)
+        cv2.putText(imgBackground,str(studentInfo[2]),(1006,550),cv2.FONT_HERSHEY_COMPLEX,0.5,(255,255,255),1)
+        cv2.putText(imgBackground,str(studentInfo[0]),(1006,493),cv2.FONT_HERSHEY_COMPLEX,0.5,(255,255,255),1)
+        cv2.putText(imgBackground,str(studentInfo[5]),(910,625),cv2.FONT_HERSHEY_COMPLEX,0.6,(100,100,100),1)
+        cv2.putText(imgBackground,str(studentInfo[6]),(1025,625),cv2.FONT_HERSHEY_COMPLEX,0.6,(100,100,100),1)
+        cv2.putText(imgBackground,str(studentInfo[3]),(1125,625),cv2.FONT_HERSHEY_COMPLEX,0.6,(100,100,100),1)
+
+        w,h,_=cv2.getTextSize(studentInfo[1]),cv2.FONT_HERSHEY_COMPLEX,1,1
+        cv2.putText(imgBackground,str(studentInfo[1]),(808,445),cv2.FONT_HERSHEY_COMPLEX,1,(50,50,50),1)
 
 
     #cv2.imshow("Webcam",img) #for display webcam feed seperately
