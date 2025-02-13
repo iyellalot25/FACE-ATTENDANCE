@@ -121,7 +121,7 @@ while True:
         cv2.putText(imgBackground,str(studentInfo[6]),(1025,625),cv2.FONT_HERSHEY_COMPLEX,0.6,(100,100,100),1)
         cv2.putText(imgBackground,str(studentInfo[3]),(1125,625),cv2.FONT_HERSHEY_COMPLEX,0.6,(100,100,100),1)
 
-        w,h,_=cv2.getTextSize(studentInfo[1]),cv2.FONT_HERSHEY_COMPLEX,1,1
+        w,h,_=cv2.getTextSize(studentInfo[1],cv2.FONT_HERSHEY_COMPLEX,1,1)
         cv2.putText(imgBackground,str(studentInfo[1]),(808,445),cv2.FONT_HERSHEY_COMPLEX,1,(50,50,50),1)
 
 
