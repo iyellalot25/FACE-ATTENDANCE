@@ -123,6 +123,7 @@ while True:
                     modeType=1
         if counter!=0:
             if counter==1:
+
                 #Fetch data from face
                 studentInfo=fetch_student_data(id)
                 print(studentInfo)  
@@ -131,13 +132,17 @@ while True:
                 imgStudent = cv2.resize(imgStudent, (260, 216))
                 #Update db
                 if studentInfo:
+                    datetimeObject=datetime.strtime(studentInfo[7]) #lastattendancetime
                     new_attendance = studentInfo[4] + 1
                     cursor.execute("UPDATE students SET total_attendance = ? WHERE id = ?", (new_attendance, id))
                     conn.commit()
                     print(f"Attendance updated for ID {id}. Total attendance: {new_attendance}")
                     studentInfo = fetch_student_data(id) #Refreshing
 
-                
+        if 10<counter<20:
+            modeType=2
+
+        imgBackground[44:44+633,808:808+414]= imgModeList[modeType]
         if counter<=10:
             cv2.putText(imgBackground,str(studentInfo[4]),(861,125),cv2.FONT_HERSHEY_COMPLEX,1,(255,255,255),1)
             cv2.putText(imgBackground,str(studentInfo[2]),(1006,550),cv2.FONT_HERSHEY_COMPLEX,0.5,(255,255,255),1)
@@ -152,6 +157,20 @@ while True:
 
             imgBackground[175:175+216,909:909+260]=imgStudent
         counter+=1
+
+        if counter>=20:
+            counter=0
+            modeType=0
+            studentInfo=[]
+            imgStudent=[]
+            imgBackground[44:44+633,808:808+414]= imgModeList[modeType]
+
+    if not faceCurFrame:  # No face detected
+        counter = 0
+        modeType = 0
+        studentInfo = []
+        imgStudent = []
+        imgBackground[44:44+633, 808:808+414] = imgModeList[modeType]  # Reset to mode 0
 
 
     #cv2.imshow("Webcam",img) #for display webcam feed seperately
