@@ -77,9 +77,21 @@ def fetch_student_data(student_id):
     else:
         return None
 
+def fetch_image(student_id):
+    image_path = f'images/{student_id}.jpg'  # Assuming images are stored as '123.jpg', '456.jpg', etc.
+    
+    if os.path.exists(image_path):
+        img = cv2.imread(image_path)
+        return img
+    else:
+        print(f"Image for student ID {student_id} not found.")
+        return None
+
+
 counter=0
 modeType=0
 id=-1
+imgStudent=[]
 
 while True:
     success, img= cap.read()
@@ -111,18 +123,35 @@ while True:
                     modeType=1
         if counter!=0:
             if counter==1:
+                #Fetch data from face
                 studentInfo=fetch_student_data(id)
-                print(studentInfo)
-                counter+=1
-        cv2.putText(imgBackground,str(studentInfo[4]),(861,125),cv2.FONT_HERSHEY_COMPLEX,1,(255,255,255),1)
-        cv2.putText(imgBackground,str(studentInfo[2]),(1006,550),cv2.FONT_HERSHEY_COMPLEX,0.5,(255,255,255),1)
-        cv2.putText(imgBackground,str(studentInfo[0]),(1006,493),cv2.FONT_HERSHEY_COMPLEX,0.5,(255,255,255),1)
-        cv2.putText(imgBackground,str(studentInfo[5]),(910,625),cv2.FONT_HERSHEY_COMPLEX,0.6,(100,100,100),1)
-        cv2.putText(imgBackground,str(studentInfo[6]),(1025,625),cv2.FONT_HERSHEY_COMPLEX,0.6,(100,100,100),1)
-        cv2.putText(imgBackground,str(studentInfo[3]),(1125,625),cv2.FONT_HERSHEY_COMPLEX,0.6,(100,100,100),1)
+                print(studentInfo)  
+                #Fetch image from storage(local) later implement from db
+                imgStudent=fetch_image(id)
+                imgStudent = cv2.resize(imgStudent, (260, 216))
+                #Update db
+                if studentInfo:
+                    new_attendance = studentInfo[4] + 1
+                    cursor.execute("UPDATE students SET total_attendance = ? WHERE id = ?", (new_attendance, id))
+                    conn.commit()
+                    print(f"Attendance updated for ID {id}. Total attendance: {new_attendance}")
+                    studentInfo = fetch_student_data(id) #Refreshing
 
-        w,h,_=cv2.getTextSize(studentInfo[1],cv2.FONT_HERSHEY_COMPLEX,1,1)
-        cv2.putText(imgBackground,str(studentInfo[1]),(808,445),cv2.FONT_HERSHEY_COMPLEX,1,(50,50,50),1)
+                
+        if counter<=10:
+            cv2.putText(imgBackground,str(studentInfo[4]),(861,125),cv2.FONT_HERSHEY_COMPLEX,1,(255,255,255),1)
+            cv2.putText(imgBackground,str(studentInfo[2]),(1006,550),cv2.FONT_HERSHEY_COMPLEX,0.5,(255,255,255),1)
+            cv2.putText(imgBackground,str(studentInfo[0]),(1006,493),cv2.FONT_HERSHEY_COMPLEX,0.5,(255,255,255),1)
+            cv2.putText(imgBackground,str(studentInfo[5]),(910,625),cv2.FONT_HERSHEY_COMPLEX,0.6,(100,100,100),1)
+            cv2.putText(imgBackground,str(studentInfo[6]),(1025,625),cv2.FONT_HERSHEY_COMPLEX,0.6,(100,100,100),1)
+            cv2.putText(imgBackground,str(studentInfo[3]),(1125,625),cv2.FONT_HERSHEY_COMPLEX,0.6,(100,100,100),1)
+
+            (w,h),_=cv2.getTextSize(studentInfo[1],cv2.FONT_HERSHEY_COMPLEX,1,1) #1 corresponds to name in database
+            offset=(414-w)//2
+            cv2.putText(imgBackground,str(studentInfo[1]),(808+offset,445),cv2.FONT_HERSHEY_COMPLEX,1,(50,50,50),1)
+
+            imgBackground[175:175+216,909:909+260]=imgStudent
+        counter+=1
 
 
     #cv2.imshow("Webcam",img) #for display webcam feed seperately
