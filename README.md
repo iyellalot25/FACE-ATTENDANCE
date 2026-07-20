@@ -123,6 +123,10 @@ pip install dlib
 
 ---
 
-## ⭐ Support
+## 👨‍💻 Author
 
-If you found this project useful, consider giving it a ⭐ on GitHub!
+**Srijan Ghosh**
+
+Aspiring Software Engineer focused on building production-ready full-stack applications with modern web technologies and AI-powered user experiences.
+
+---
